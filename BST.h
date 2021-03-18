@@ -1,4 +1,3 @@
-#include <math.h>
 using namespace std;
 /**
  * the basic struct of a node
@@ -29,24 +28,24 @@ private:
      * @param smallerThan
      * @return
      */
-    bool testBST(node<comparable>* node, double biggerThan, double smallerThan){
-        if(!node)
+    bool testBST(node<comparable>* currentNode, node<comparable>* smallerThan, node<comparable>* biggerThan){
+        if(!currentNode)
             return true;
 
         bool leftTest = true;
-        if(!isnan(biggerThan) && node->value < biggerThan)
+        if(!biggerThan && currentNode->value < biggerThan->value)
             leftTest = false;
 
 
         bool rightTest = true;
-        if(!isnan(smallerThan) && node->value > smallerThan)
+        if(!smallerThan && currentNode->value > smallerThan->value)
             rightTest = false;
 
         bool immediateTestOk = rightTest && leftTest;
         if(!immediateTestOk)
             return false;
 
-        return testBST(node->left, node->value, smallerThan) && testBST(node->right, biggerThan, node->value);
+        return testBST(currentNode->left, currentNode, biggerThan) && testBST(currentNode->right, smallerThan, currentNode);
     }
 
     int const COUNT = 10;
@@ -68,7 +67,7 @@ private:
         cout<<endl;
         for (int i = COUNT; i < space; i++)
             cout<<" ";
-        cout<<currentNode->value<<"\n";
+        cout<<currentNode->value<< (currentNode->isRed ? "R": "B") <<"\n";
 
         // Process left child
         if(currentNode->left)
@@ -92,6 +91,79 @@ private:
 
         return max + 1;
     }
+
+protected:
+
+
+    /**
+     * IN THIS CONVENTION THE FUNCTION LIFTS THE CHILD NODE
+     * the standard left rotation
+     * but it also updates heights
+     * @param currentNode
+     */
+    void rotateLeft(node<comparable> *currentNode) {
+
+        node<comparable> *child = currentNode->right;
+        node<comparable> *grandChild = currentNode->right->left;
+        node<comparable> *parent = currentNode->parent;
+
+        if (currentNode == this->root) {
+            this->root = child;
+        }
+
+        if(parent){
+            if(currentNode == parent->left){
+                parent->left = child;
+            } else {
+                parent->right = child;
+            }
+        }
+
+        child->parent = parent;
+        currentNode->right = grandChild;
+        child->left = currentNode;
+        currentNode->parent = child;
+
+        if(grandChild)
+            grandChild->parent = currentNode;
+
+    }
+
+    /**
+     * IN THIS CONVENTION THE FUNCTION LIFTS THE CHILD NODE
+     * the standard right rotation
+     * but it also updates heights
+     * @param currentNode
+     */
+    void rotateRight(node<comparable> *currentNode) {
+
+        node<comparable> *child = currentNode->left;
+        node<comparable> *grandChild = currentNode->left->right;
+        node<comparable> *parent = currentNode->parent;
+
+        if (currentNode == this->root) {
+            this->root = child;
+        }
+
+        if(parent){
+            if(currentNode == parent->left){
+                parent->left = child;
+            } else {
+                parent->right = child;
+            }
+        }
+
+        child->parent = parent;
+        currentNode->left = grandChild;
+        child->right = currentNode;
+        currentNode->parent = child;
+
+        if(grandChild)
+            grandChild->parent = currentNode;
+
+    }
+
+
 public:
     node<comparable>* root = nullptr;
     /**
@@ -287,7 +359,7 @@ public:
      * @return
      */
     bool testBST(){
-        return testBST(root, NAN, NAN);
+        return testBST(root, nullptr, nullptr);
     }
 
     void print()
