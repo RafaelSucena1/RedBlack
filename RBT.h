@@ -68,41 +68,47 @@ public:
 private:
 
     RBT fixupInsertRB(node<comparable> *currentNode) {
-        node<comparable> *parent = currentNode->parent;
-        while (parent && parent->isRed) {
-            if (parent->parent && parent->parent->left == parent) {
+        while (!isBlack(currentNode->parent)) {
+            node<comparable> *parent = currentNode->parent;
+
+            if (parent->parent->left == parent) {
                 node<comparable> *uncle = parent->parent->right;
+
                 if (!isBlack(uncle)) {
                     parent->isRed = false;
                     uncle->isRed = false;
                     parent->parent->isRed = true;
                     currentNode = parent->parent;
+
                 } else {
                     if (currentNode == parent->right) {
                         currentNode = parent;
-                        rotateLeft(currentNode);
+                        this->rotateLeft(currentNode);
                     }
                     parent = currentNode->parent;
                     parent->isRed = false;
                     parent->parent->isRed = true;
-                    rotateRight(parent->parent);
+                    this->rotateRight(parent->parent);
                 }
+
             } else {
                 node<comparable> *uncle = parent->parent->left;
+
                 if (!isBlack(uncle)) {
                     parent->isRed = false;
                     uncle->isRed = false;
                     parent->parent->isRed = true;
                     currentNode = parent->parent;
                 } else {
+
                     if (currentNode == parent->left) {
                         currentNode = parent;
-                        rotateRight(currentNode);
+                        this->rotateRight(currentNode);
                     }
                     parent = currentNode->parent;
                     parent->isRed = false;
                     parent->parent->isRed = true;
-                    rotateLeft(parent->parent);
+                    this->rotateLeft(parent->parent);
                 }
             }
         }
@@ -118,7 +124,7 @@ private:
                 if(uncle->isRed){
                     uncle->isRed = false;
                     parent->isRed = true;
-                    rotateLeft(parent);
+                    this->rotateLeft(parent);
                     uncle = parent->right;
                 }
                 if(!uncle->left->isRed && !uncle->right->isRed){
@@ -128,13 +134,13 @@ private:
                     if(!uncle->right->isRed){
                         uncle->left->isRed = false;
                         uncle->isRed = true;
-                        rotateRight(uncle);
+                        this->rotateRight(uncle);
                         uncle = parent->right;
                     }
                     uncle->isRed  = parent->isRed;
                     parent->isRed = false;
                     uncle->right->isRed = false;
-                    rotateLeft(parent);
+                    this->rotateLeft(parent);
                     this->root = currentNode;
                 }
             } else {
@@ -142,7 +148,7 @@ private:
                 if(uncle->isRed){
                     uncle->isRed = false;
                     parent->isRed = true;
-                    rotateRight(parent);
+                    this->rotateRight(parent);
                     uncle = parent->left;
                 }
                 if(!uncle->left->isRed && !uncle->left->isRed){
@@ -152,80 +158,18 @@ private:
                     if(!uncle->left->isRed){
                         uncle->right->isRed = false;
                         uncle->isRed = true;
-                        rotateLeft(uncle);
-                        /**
-                         * this move might be tricky
-                         */
+                        this->rotateLeft(uncle);
                         uncle = parent->left;
                     }
                     uncle->isRed  = parent->isRed;
                     parent->isRed = false;
                     uncle->left->isRed = false;
-                    rotateRight(parent);
+                    this->rotateRight(parent);
                     this->root = currentNode;
                 }
             }
         }
         currentNode->isRed = false;
-    }
-
-    /**
-     * IN THIS CONVENTION THE FUNCTION LIFTS THE CHILD NODE
-     * the standard left rotation
-     * but it also updates heights
-     * @param currentNode
-     */
-    void rotateLeft(node<comparable> *currentNode) {
-
-        node<comparable> *child = currentNode->right;
-        node<comparable> *parent = currentNode->parent;
-
-
-        child->parent = parent;
-        currentNode->right = child->left;
-        currentNode->parent = child;
-        child->left = currentNode;
-
-        if (currentNode == this->root) {
-            this->root = child;
-            return;
-        } else {
-            if (parent->right == currentNode) {
-                parent->right = child;
-            } else {
-                parent->left = child;
-            }
-        }
-
-    }
-
-    /**
-     * IN THIS CONVENTION THE FUNCTION LIFTS THE CHILD NODE
-     * the standard right rotation
-     * but it also updates heights
-     * @param currentNode
-     */
-    void rotateRight(node<comparable> *currentNode) {
-
-        node<comparable> *child = currentNode->left;
-        node<comparable> *parent = currentNode->parent;
-
-        child->parent = parent;
-        currentNode->left = child->right;
-        currentNode->parent = child;
-        child->right = currentNode;
-
-        if (currentNode == this->root) {
-            this->root = child;
-            return;
-        } else {
-            if (parent->right == currentNode) {
-                parent->right = child;
-            } else {
-                parent->left = child;
-            }
-        }
-
     }
 
     /**
@@ -249,6 +193,8 @@ private:
             return true;
         if (currentNode->isRed) {
             if (!isBlack(currentNode->left) || !isBlack(currentNode->right)) {
+                cout << "ifNodeIsRedBothChildrenAreBlack:: false" << endl;
+                cout << "node value= " << currentNode->value << endl;
                 return false;
             }
         }
@@ -273,7 +219,8 @@ private:
         countNumberOfBlackNodes(this->root);
 
         bool result = numberBlackNodesPropertyDidNotFail;
-
+if(!result)
+    cout << "sameNumberOfBlackNodes:: false" << endl;
         numberBlackNodesPropertyDidNotFail = true;
 
         return result;
